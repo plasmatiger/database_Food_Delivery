@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Online Food Delivery System</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+     <link rel="shortcut icon" type="image/png" href="images/favicon.png"/>
+    <style type="text/css">
+        body {
+                background-color: #EEE;
+        }
+        .text-primary {
+            font-family: Roboto,Helvetica,Arial,sans-serif;
+                font-weight: 300;
+                color: #009688;
+        }
+        .panel {
+                border-radius: 2px;
+                border: 0;
+                -webkit-box-shadow: 0 1px 6px 0 rgba(0,0,0,.12),0 1px 6px 0 rgba(0,0,0,.12);
+                box-shadow: 0 1px 6px 0 rgba(0,0,0,.12),0 1px 6px 0 rgba(0,0,0,.12);
+                margin-bottom: 20px;
+                background-color: #fff;
+                font-size: 14px;
+        }
+        h3 {
+                font-size: 24px;
+        }
+        .panel-default>.panel-heading {
+                color: #333;
+                background-color: #f5f5f5;
+                border-color: #ddd;
+        }
+        .panel-heading {
+                padding: 10px 15px;
+                border-bottom: 1px solid transparent;
+                border-top-left-radius: 3px;
+                border-top-right-radius: 3px;
+        }
+        * {
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+        }
+        .label{
+            font-size: 16px;
+                font-weight: 500;
+        }
+        .grid{
+            border: 1px solid #eee;
+            text-align: center;
+            line-height: 50px;
+            background-color: tomato;
+            height: 130px;
+            color: white;
+            margin: 40px;
+            margin-bottom: 0px;
+        }
+        .select-wrapper{
+            width: 10em;
+            left: 7em;
+        }
+    </style>
+</head>
+<body>
+{% if error %}
+<script type="text/javascript">
+    alert("{{ error }}");
+</script>
+{% endif %}
+<nav>
+<div class="nav-wrapper" style="padding-left: 15px;">
+  <div class="brand-logo"><i class="fa fa-user" aria-hidden="true"></i>Welcome {{fname}}</div>
+  <div class="brand-logo" style="left: 550px;"><i class="fa fa-location-arrow" aria-hidden="true"></i> Kolkata</div>
+  <ul class="right hide-on-med-and-down">
+    <li><a href="/rhome" title="Home page"> <i class="fa fa-home" style="font-size: 1.5em;" aria-hidden="true"></i></a></li>
+    <li><a href="/logout" title="Logout"> <i class="fa fa-power-off" style="font-size: 1.5em;" aria-hidden="true"></i></a></li>
+  </ul>
+</div>
+</nav>
+<div class="container" style="padding-top: 10px;">
+    <div class="panel-heading" style="text-align: center;">
+      <h3 class="text-primary" style="color: black;"><i class="fa fa-tachometer" aria-hidden="true"></i>&nbsp;&nbsp;All orders</h3>
+    </div>
+    <div class="panel panel-default" style="max-height: 420px; padding-bottom: 20px;overflow-x: hidden; overflow-y: auto;">
+        <table id="content" class="striped centered responsive-table">
+        <thead>
+          <tr>
+              <th data-field="user">User ID</th>
+              <th data-field="order">Order ID</th>
+              <th data-field="iname">Item name</th>
+              <th data-field="status">Status</th>
+          </tr>
+        </thead>
+        <tbody id="tcontent">
+            <!-- Table content          -->
+        </tbody>
+        </table>
+    </div>
+</div>
+</form> 
+</div>
+</body>
+<script type="text/javascript">
+    $.get("/orders", function( data ) {
+        // console.log(data);
+        var prev = "";
+        for(var i = 0; i < data.length; i++){
+            for(var j = 0; j < data[i].length; j++){
+                console.log(data[i][j]);
+                var k = "", k1 = "", k2="";
+                if(data[i][j][0] != prev){
+                    k = data[i][j][0];
+                    k1 = data[i][j][4];
+                    k2 = "<select class='selstatus' data-id='"+k+"'><option value='Acknowledged' selected>Acknowledged</option><option value='Processing'>Processing</option><option value='Completed'>Completed</option><option value='Out for Delivery'>Out for Delivery</option><option value='Delivered'>Delivered</option></select>";
+                }
+                trow = "<tr><td>"+k1+"</td><td>"+ k +"</td><td>"+ data[i][j][1] +"</td><td>"+k2+"</td></tr>";
+                $("#tcontent").append(trow);
+                prev = data[i][j][0];
+            }
+            $('select').material_select();
+            $(".selstatus").on('change', function() {
+                var status = $('option:selected', this).val(), trow, k;
+                var order_id = $(this).attr('data-id');
+                if (typeof order_id === "undefined") {
+                    alert("Item status updated");
+                    return;
+                }
+                $.post( 
+                  "/modifystatus",
+                  { status: status,
+                    order_id: order_id
+                  },
+                  function(data) {
+                  }
+                );
+            });        
+        }
+    });
+</script>
+</html>

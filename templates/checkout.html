@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Online Food Delivery System</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+     <link rel="shortcut icon" type="image/png" href="images/favicon.png"/>
+    <style type="text/css">
+        body {
+                background-color: #EEE;
+        }
+        .text-primary {
+            font-family: Roboto,Helvetica,Arial,sans-serif;
+                font-weight: 300;
+                color: #009688;
+        }
+        .panel {
+                border-radius: 2px;
+                border: 0;
+                -webkit-box-shadow: 0 1px 6px 0 rgba(0,0,0,.12),0 1px 6px 0 rgba(0,0,0,.12);
+                box-shadow: 0 1px 6px 0 rgba(0,0,0,.12),0 1px 6px 0 rgba(0,0,0,.12);
+                margin-bottom: 20px;
+                background-color: #fff;
+                font-size: 14px;
+        }
+        h3 {
+                font-size: 24px;
+        }
+        .panel-default>.panel-heading {
+                color: #333;
+                background-color: #f5f5f5;
+                border-color: #ddd;
+        }
+        .panel-heading {
+                padding: 10px 15px;
+                border-bottom: 1px solid transparent;
+                border-top-left-radius: 3px;
+                border-top-right-radius: 3px;
+        }
+        * {
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+        }
+        .label{
+            font-size: 16px;
+                font-weight: 500;
+        }
+        .grid{
+            border: 1px solid #eee;
+            text-align: center;
+            line-height: 50px;
+            background-color: tomato;
+            height: 130px;
+            color: white;
+            margin: 40px;
+            margin-bottom: 0px;
+        }
+    </style>
+</head>
+<body>
+{% if error %}
+<script type="text/javascript">
+    alert("{{ error }}");
+</script>
+{% endif %}
+<nav>
+<div class="nav-wrapper" style="padding-left: 15px;">
+  <div class="brand-logo"><i class="fa fa-user" aria-hidden="true"></i>Welcome {{fname}}</div>
+  <div class="brand-logo" style="left: 550px;"><i class="fa fa-location-arrow" aria-hidden="true"></i> Kolkata</div>
+  <ul class="right hide-on-med-and-down">
+    <li><a href="/home" title="Home page"> <i class="fa fa-home" style="font-size: 1.5em;" aria-hidden="true"></i></a></li>
+    <li><a href="/home/order/history" title="View order history"> <i class="fa fa-history" style="font-size: 1.5em;" aria-hidden="true"></i></a></li>
+    <li><a href="/home/cuisines/{{cuisine_id}}/{{res_uname}}/checkout" title="Logout"> <i class="fa fa-cart-arrow-down"  style="font-size: 1.5em;" aria-hidden="true"></i></a></li>
+    <li><a href="/logout" title="Logout"> <i class="fa fa-power-off" style="font-size: 1.5em;" aria-hidden="true"></i></a></li>
+  </ul>
+</div>
+</nav>
+<div class="container" style="padding-top: 10px;">
+    <div class="panel-heading" style="text-align: center;">
+      <h3 class="text-primary" style="color: black;"><i class="fa fa-cutlery" aria-hidden="true"></i>&nbsp;&nbsp;{{res_name}}</h3>
+    </div>
+    <div class="row">
+        <form class="col s12" action="#">
+          <div class="row">
+            <div class="input-field col s6">
+              <i class="material-icons prefix fa fa-user-circle" aria-hidden="true"></i>
+              <input id="icon_prefix" type="text" class="validate" name="fname" required>
+              <label for="icon_prefix">First Name</label>
+            </div>
+            <div class="input-field col s6">
+              <i class="material-icons prefix fa fa-phone" aria-hidden="true"></i>
+              <input id="icon_telephone" type="number" class="validate" name="telephone" required>
+              <label for="icon_telephone">Telephone</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s12">
+              <i class="material-icons prefix fa fa-address-book" aria-hidden="true"></i>
+              <textarea id="textarea1" class="materialize-textarea" name="address" required></textarea>
+              <label for="textarea1">Address</label>
+            </div>
+          </div>
+        </form>
+    </div>
+    <div id="content" class="panel panel-default" style="max-height: 420px; overflow-x: hidden; overflow-y: auto;">
+        <div class="row" style="text-align: center; font-weight: 700; font-size: 25px;">
+            <div class="input-field col s4 offset-s4">
+                Bill
+            </div>
+        </div>
+        <table class="striped centered responsive-table">
+        <thead>
+            <tr>
+                <th data-field="name">Name</th>
+                <th data-field="price">Price</th>
+                <th data-field="quantity">Quantity</th>
+                <th data-field="itot">Item total</th>
+            </tr>
+        </thead>
+        <tbody id="tcontent">
+            <!-- Table content          -->
+        </tbody>
+        </table>
+    </div>
+      <button class="btn waves-effect waves-light" onclick="submit()">Place order</button>
+      <div class="row"></div>
+</div>
+</form> 
+</div>
+<div style="position: fixed; bottom: 20px; right: 60px; font-size: 1.5em;" id="total" class="text-primary"></div>
+</body>
+<script type="text/javascript">
+    var name, price, quan;
+    name = sessionStorage.getItem('name').split(',');
+    price = sessionStorage.getItem('price').split(',');
+    quan = sessionStorage.getItem('quan').split(',');
+    var xname = name.split(',');
+    function getTot(){
+        var tot = 0;
+        for(var i = 0; i < quan.length; i++){
+            tot += price[i]*quan[i];
+        }
+        return tot;
+    }
+    for(var k = 0; k < quan.length; k++){
+        if(quan[k] != "0"){
+            trow = "<tr><td>"+ xname[k] +"</td><td>"+ price[k] +"</td><td>"+quan[k]+"</td><td>"+parseInt(price[k])*parseInt(quan[k])+"</td></tr>";
+            $("#tcontent").append(trow);
+        }
+    }
+    function submit(){
+        var n = sessionStorage.getItem('name'), p = sessionStorage.getItem('price'), q = sessionStorage.getItem('quan');
+        var Fname = $("#icon_prefix").val();
+        var Telephone = $("#icon_telephone").val();
+        var Address = $("#textarea1").val();
+        if(Fname.length == 0 || Telephone.length == 0 || Address.length == 0){
+            alert("Please fill in all fields");
+            return;
+        }
+        console.log(n);
+        console.log(p);
+        console.log(q);
+        $.post( 
+          "/home/cuisines/{{cuisine_id}}/{{res_uname}}/order",
+          { fname: Fname,
+            telephone: Telephone,
+            address: Address,
+            iname: n,
+            iprice: p,
+            iquan: q
+          },
+          function(data) {
+            alert(data);
+            sessionStorage.clear();
+            window.location = "/home";
+          }
+        );
+    }
+    $("#content").append('<div class="row"></div><div style="float: right; position: relative; right: 85px; font-size: 20px;">Total = '+getTot()+'</div><div class="row"></div>');
+</script>
+</html>

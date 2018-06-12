@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Online Food Delivery System</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+     <link rel="shortcut icon" type="image/png" href="images/favicon.png"/>
+    <style type="text/css">
+        body {
+                background-color: #EEE;
+        }
+        .text-primary {
+            font-family: Roboto,Helvetica,Arial,sans-serif;
+                font-weight: 300;
+                color: #009688;
+        }
+        .panel {
+                border-radius: 2px;
+                border: 0;
+                -webkit-box-shadow: 0 1px 6px 0 rgba(0,0,0,.12),0 1px 6px 0 rgba(0,0,0,.12);
+                box-shadow: 0 1px 6px 0 rgba(0,0,0,.12),0 1px 6px 0 rgba(0,0,0,.12);
+                margin-bottom: 20px;
+                background-color: #fff;
+                font-size: 14px;
+        }
+        h3 {
+                font-size: 24px;
+        }
+        .panel-default>.panel-heading {
+                color: #333;
+                background-color: #f5f5f5;
+                border-color: #ddd;
+        }
+        .panel-heading {
+                padding: 10px 15px;
+                border-bottom: 1px solid transparent;
+                border-top-left-radius: 3px;
+                border-top-right-radius: 3px;
+        }
+        * {
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+        }
+        .label{
+            font-size: 16px;
+                font-weight: 500;
+        }
+        .grid{
+            border: 1px solid #eee;
+            text-align: center;
+            line-height: 50px;
+            background-color: tomato;
+            height: 130px;
+            color: white;
+            margin: 40px;
+            margin-bottom: 0px;
+        }
+    </style>
+</head>
+<body>
+{% if error %}
+<script type="text/javascript">
+    alert("{{ error }}");
+</script>
+{% endif %}
+<nav>
+<div class="nav-wrapper" style="padding-left: 15px;">
+  <div class="brand-logo"><i class="fa fa-user" aria-hidden="true"></i>Welcome {{fname}}</div>
+  <div class="brand-logo" style="left: 550px;"><i class="fa fa-location-arrow" aria-hidden="true"></i> Kolkata</div>
+  <ul class="right hide-on-med-and-down">
+    <li><a href="/home" title="Home page"> <i class="fa fa-home" style="font-size: 1.5em;" aria-hidden="true"></i></a></li>
+    <li><a href="/home/order/history" title="View order history"> <i class="fa fa-history" style="font-size: 1.5em;" aria-hidden="true"></i></a></li>
+    <li><a href="javascript:void(0)" onclick="saveData();" title="Proceed to checkout"> <i class="fa fa-cart-arrow-down"  style="font-size: 1.5em;" aria-hidden="true"></i></a></li>
+    <li><a href="/logout" title="Logout"> <i class="fa fa-power-off" style="font-size: 1.5em;" aria-hidden="true"></i></a></li>
+  </ul>
+</div>
+</nav>
+<div class="container" style="padding-top: 10px;">
+    <div class="panel-heading" style="text-align: center;">
+      <h3 class="text-primary" style="color: black;"><i class="fa fa-cutlery" aria-hidden="true"></i>&nbsp;&nbsp;{{res_name}}</h3>
+    </div>
+    <div class="panel panel-default" style="max-height: 420px; overflow-x: hidden; overflow-y: auto;">
+        <table id="content" class="striped centered responsive-table">
+        <thead>
+            <tr>
+                <th data-field="cross"></th>
+                <th data-field="name">Name</th>
+                <th data-field="price">Price</th>
+                <th data-field="quantity">Quantity</th>
+                <th data-field="itot">Item total</th>
+            </tr>
+        </thead>
+        <tbody id="tcontent">
+            <!-- Table content          -->
+        </tbody>
+        </table>
+    </div>
+</div>
+</form> 
+</div>
+<div style="position: fixed; bottom: 20px; right: 60px; font-size: 1.5em;" id="total" class="text-primary"></div>
+</body>
+<script type="text/javascript">
+    var j = 0;
+    var name, price, quan;
+    name = sessionStorage.getItem('name').split(',');
+    price = sessionStorage.getItem('price').split(',');
+    quan = sessionStorage.getItem('quan').split(',');
+    var xname = name.split(',');
+    $("#total").html("Total = "+getTot());
+    function saveData(){
+        if(getTot() == 0){
+            alert("Cart is empty");
+            return;
+        }
+        sessionStorage.setItem('name', name);
+        sessionStorage.setItem('price', price);
+        sessionStorage.setItem('quan', quan);
+        window.location='/home/cuisines/{{cuisine_id}}/{{res_uname}}/checkout';
+    }
+    function getTot(){
+        var tot = 0;
+        for(var i = 0; i < quan.length; i++){
+            tot += price[i]*quan[i];
+        }
+        return tot;
+    }
+    function set(){
+        var f = $("input:focus").attr('data-id');
+        var val = $("input:focus").val();
+        quan[f] = val;
+        sessionStorage.setItem('quan', quan);
+        $("td[data-tot='" + f +"']").html(parseInt(price[f])*parseInt(quan[f]));
+        $("#total").html("Total = "+getTot());
+    }
+    function removeItem(k){
+        quan[k] = 0;
+        sessionStorage.setItem('quan', quan);
+        $("tr[data-row='" + k +"']").remove();
+        $("#total").html("Total = "+getTot());
+    }
+    for(var k = 0; k < quan.length; k++){
+        if(quan[k] != "0"){
+            trow = "<tr data-row='"+k+"'><td>&nbsp;&nbsp;<a href='#' onclick='var r = window.confirm(\"Are you sure you want to remove this item?\");if(r){removeItem("+k+")}' style='color:#a93333;font-size: 1.5em;' title='Remove item'><i class=\"fa fa-times\" aria-hidden=\"true\"></i></a></td><td>"+ xname[k] +"</td><td>"+ price[k] +"</td><td><input data-id='"+k+"' style='width: 4em' min='0' type='number' class='validate' value='"+quan[k]+"' oninput='set()'></td><td data-tot='"+k+"'>"+parseInt(price[k])*parseInt(quan[k])+"</td></tr>";
+            $("#tcontent").append(trow);
+        }
+    }
+</script>
+</html>
